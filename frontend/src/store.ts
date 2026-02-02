@@ -63,7 +63,7 @@ interface AppState {
   toggleCode: () => void
 }
 
-export const useAppStore = create<AppState>((set, get) => ({
+export const useAppStore = create<AppState>((set) => ({
   // Initial map state - centered on Kazakhstan
   viewState: {
     longitude: 67.0,

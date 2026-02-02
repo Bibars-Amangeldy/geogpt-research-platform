@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import Map, { NavigationControl, ScaleControl, GeolocateControl, Source, Layer } from 'react-map-gl/maplibre'
 import type { MapRef, MapLayerMouseEvent } from 'react-map-gl/maplibre'
 import { useAppStore } from '../store'
@@ -25,10 +25,10 @@ const BASEMAPS = [
     name: 'Satellite', 
     icon: Satellite, 
     style: {
-      version: 8,
+      version: 8 as const,
       sources: {
         satellite: {
-          type: 'raster',
+          type: 'raster' as const,
           tiles: [
             'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
           ],
@@ -39,7 +39,7 @@ const BASEMAPS = [
       layers: [
         {
           id: 'satellite-layer',
-          type: 'raster',
+          type: 'raster' as const,
           source: 'satellite',
           minzoom: 0,
           maxzoom: 22
@@ -53,7 +53,6 @@ export default function MapView() {
   const mapRef = useRef<MapRef>(null)
   const { viewState, setViewState, layers, selectedBasemap, setBasemap, is3DEnabled, toggle3D } = useAppStore()
   const [cursorPosition, setCursorPosition] = useState<{ lng: number; lat: number } | null>(null)
-  const [isFullscreen, setIsFullscreen] = useState(false)
 
   // Get current basemap style
   const currentBasemap = BASEMAPS.find(b => b.id === selectedBasemap) || BASEMAPS[0]
@@ -85,10 +84,8 @@ export default function MapView() {
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen()
-      setIsFullscreen(true)
     } else {
       document.exitFullscreen()
-      setIsFullscreen(false)
     }
   }
 
@@ -102,13 +99,7 @@ export default function MapView() {
     })
   }
 
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
-    }
-    document.addEventListener('fullscreenchange', handleFullscreenChange)
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
-  }, [])
+
 
   return (
     <div className="relative w-full h-full">
