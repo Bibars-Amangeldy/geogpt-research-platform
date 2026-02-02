@@ -1,0 +1,44 @@
+# Render.com Deployment Configuration
+# This deploys both frontend and backend
+
+services:
+  # Backend API Service
+  - type: web
+    name: geogpt-api
+    runtime: python
+    region: frankfurt
+    plan: free
+    buildCommand: |
+      cd backend
+      pip install -r requirements.txt
+    startCommand: |
+      cd backend
+      uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: "https://geogpt-frontend.onrender.com,https://geogpt-kz.vercel.app"
+    healthCheckPath: /health
+
+  # Frontend Static Site
+  - type: web
+    name: geogpt-frontend
+    runtime: static
+    buildCommand: |
+      cd frontend
+      npm install
+      npm run build
+    staticPublishPath: frontend/dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=31536000
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
