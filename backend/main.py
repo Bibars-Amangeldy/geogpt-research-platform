@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
     debug: bool = True
-    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000,https://frontend-alpha-pied-55.vercel.app,https://frontend-dpixdkizn-bars-projects-1465.vercel.app"
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 
@@ -44,11 +44,14 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS configuration
+# CORS configuration - allow all origins for production
+origins = settings.cors_origins.split(",")
+origins.extend(["*"])  # Allow all origins for API access
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins.split(","),
-    allow_credentials=True,
+    allow_origins=["*"],  # Allow all origins for public API
+    allow_credentials=False,  # Must be False when using wildcard
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -93,7 +96,13 @@ class GeoGPTAgent:
     def initialize_agent(self):
         """Initialize the GeoAgent with available LLM provider"""
         try:
-            from geoagent import GeoAgent
+            # Try to import GeoAgent but don't fail if not available
+            try:
+                from geoagent import GeoAgent
+            except ImportError:
+                print("⚠️ GeoAgent not installed - running in demo mode")
+                self.agent = None
+                return
             
             # Determine which provider to use
             provider = None
