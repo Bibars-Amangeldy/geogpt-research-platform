@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "apexgeo",
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
   "framework": "vite",
@@ -8,12 +7,6 @@
   "env": {
     "VITE_API_URL": "https://apexgeo-api.onrender.com"
   },
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
   "rewrites": [
     {
       "source": "/(.*)",

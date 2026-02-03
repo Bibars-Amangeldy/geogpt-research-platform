@@ -5,7 +5,7 @@ import EnvironmentalPanel from './components/EnvironmentalPanel'
 import ReportDownload from './components/ReportDownload'
 import MapToolbar from './components/MapToolbar'
 import { geoApi } from './api'
-import { Globe2, AlertCircle, CheckCircle2, Map, Menu, X } from 'lucide-react'
+import { Globe2, Menu } from 'lucide-react'
 import { useAppStore } from './store'
 
 function App() {

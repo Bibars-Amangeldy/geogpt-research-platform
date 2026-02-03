@@ -5,18 +5,12 @@ import {
   Factory, 
   Flame,
   Thermometer,
-  Gauge,
   Eye,
   EyeOff,
   ChevronDown,
-  RefreshCw,
-  Satellite,
-  Map as MapIcon,
-  Mountain
+  RefreshCw
 } from 'lucide-react'
 import { useAppStore } from '../store'
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 interface DataLayer {
   id: string
@@ -30,7 +24,7 @@ interface DataLayer {
 }
 
 export default function MapToolbar() {
-  const { sendMessage, addLayer, removeLayer, layers } = useAppStore()
+  const { sendMessage, removeLayer } = useAppStore()
   const [isExpanded, setIsExpanded] = useState(true)
   const [dataLayers, setDataLayers] = useState<DataLayer[]>([
     {
