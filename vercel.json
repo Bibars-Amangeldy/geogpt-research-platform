@@ -1,37 +1,23 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
-    {
-      "src": "backend/main.py",
-      "use": "@vercel/python"
-    }
-  ],
+  "name": "apexgeo",
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "framework": "vite",
+  "installCommand": "cd frontend && npm install",
+  "env": {
+    "VITE_API_URL": "https://apexgeo-api.onrender.com"
+  },
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "backend/main.py"
-    },
-    {
-      "src": "/health",
-      "dest": "backend/main.py"
-    },
-    {
-      "src": "/ws/(.*)",
-      "dest": "backend/main.py"
-    },
-    {
       "src": "/(.*)",
-      "dest": "frontend/$1"
+      "dest": "/$1"
     }
   ],
-  "env": {
-    "CORS_ORIGINS": "https://geogpt-kz.vercel.app,https://geogpt-research.vercel.app"
-  }
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }

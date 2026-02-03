@@ -22,3 +22,10 @@ htmlcov/
 .hypothesis/
 .mypy_cache/
 .ruff_cache/
+
+# External cloned repositories
+external/
+
+# Test files
+test_report.pdf
+backend/test_*.py

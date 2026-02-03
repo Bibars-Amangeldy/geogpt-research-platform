@@ -1,6 +1,32 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// Dynamically determine API URL based on current host
+const getApiBaseUrl = () => {
+  // Check if env variable is set
+  const envUrl = import.meta.env.VITE_API_URL
+  if (envUrl) {
+    return envUrl
+  }
+  
+  // Production: use Render backend
+  if (window.location.hostname.includes('vercel.app') || 
+      window.location.hostname.includes('apexgeo') ||
+      window.location.hostname.includes('netlify')) {
+    return 'https://apexgeo-api.onrender.com'
+  }
+  
+  // Auto-detect: use same hostname as frontend but with port 8000
+  const hostname = window.location.hostname
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:8000'
+  }
+  
+  // Use the same IP/hostname for backend
+  return `http://${hostname}:8000`
+}
+
+const API_BASE_URL = getApiBaseUrl()
+console.log('API Base URL:', API_BASE_URL) // Debug log
 
 export interface ChatRequest {
   query: string
@@ -16,9 +42,25 @@ export interface ChatRequest {
 export interface ChatResponse {
   message: string
   map_layers?: any[]
+  map_action?: {
+    type: string
+    center?: [number, number]
+    zoom?: number
+    pitch?: number
+    bearing?: number
+    bounds?: [[number, number], [number, number]]
+    duration?: number
+  }
   code?: string
   data?: Record<string, any>
   visualization?: Record<string, any>
+  chart?: {
+    type: string
+    title: string
+    labels: (string | number)[]
+    datasets: any[]
+  }
+  animation?: any
   status: string
 }
 

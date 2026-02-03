@@ -15,13 +15,17 @@ openai>=1.50.0
 
 # Data Access
 httpx>=0.27.0
+aiohttp>=3.9.0
 
 # Data Processing
 numpy>=1.26.0
 pandas>=2.2.0
 
+# PDF Report Generation
+reportlab>=4.0.0
+pillow>=10.0.0
+
 # Utilities
 requests>=2.32.0
 aiofiles>=24.1.0
 pydantic>=2.9.0
-pydantic-settings>=2.5.0

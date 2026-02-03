@@ -143,3 +143,39 @@ html, body, #root {
 .deck-tooltip {
   @apply glass-panel p-3 text-sm max-w-xs;
 }
+
+/* MapLibre Popup Styles */
+.maplibregl-popup-content {
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: rgba(30, 35, 45, 0.95) !important;
+}
+
+.maplibregl-popup-close-button {
+  display: none;
+}
+
+.feature-popup .maplibregl-popup-content {
+  background: transparent !important;
+}
+
+/* Popup Animations */
+.feature-popup {
+  animation: popupFadeIn 0.2s ease-out;
+}
+
+@keyframes popupFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

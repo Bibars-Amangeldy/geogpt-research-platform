@@ -65,7 +65,7 @@ export default function LayersPanel() {
           </div>
         ) : (
           <div className="space-y-1">
-            {layers.map((layer) => (
+            {layers.map((layer: any) => (
               <div
                 key={layer.id}
                 className={`layer-item ${layer.visible ? 'active' : ''}`}

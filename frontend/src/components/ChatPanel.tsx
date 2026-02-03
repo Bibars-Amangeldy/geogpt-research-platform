@@ -10,9 +10,12 @@ import {
   Copy, 
   Check,
   Trash2,
-  Sparkles
+  Sparkles,
+  BarChart3,
+  Map
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import ChartPanel from './ChartPanel'
 
 // Code block component with copy functionality
 function CodeBlock({ code, language = 'python' }: { code: string; language?: string }) {
@@ -51,7 +54,7 @@ function Message({ message }: { message: ChatMessage }) {
   return (
     <div className={`chat-message ${isUser ? 'chat-message-user' : 'chat-message-assistant'}`}>
       <div className="flex items-start gap-3">
-        <div className={`p-2 rounded-lg ${isUser ? 'bg-accent-primary/20' : 'bg-dark-600'}`}>
+        <div className={`p-2 rounded-lg flex-shrink-0 ${isUser ? 'bg-accent-primary/20' : 'bg-dark-600'}`}>
           {isUser ? (
             <User className="w-4 h-4 text-accent-primary" />
           ) : (
@@ -70,9 +73,25 @@ function Message({ message }: { message: ChatMessage }) {
                 pre: ({ children }) => <>{children}</>,
                 h1: ({ children }) => <h1 className="text-xl font-bold mt-4 mb-2">{children}</h1>,
                 h2: ({ children }) => <h2 className="text-lg font-semibold mt-3 mb-2">{children}</h2>,
+                h3: ({ children }) => <h3 className="text-md font-semibold mt-2 mb-1">{children}</h3>,
                 ul: ({ children }) => <ul className="list-disc list-inside space-y-1 my-2">{children}</ul>,
                 li: ({ children }) => <li className="text-dark-100">{children}</li>,
                 strong: ({ children }) => <strong className="text-white font-semibold">{children}</strong>,
+                table: ({ children }) => (
+                  <table className="w-full border-collapse my-3 text-sm">
+                    {children}
+                  </table>
+                ),
+                th: ({ children }) => (
+                  <th className="border border-dark-500 bg-dark-700 px-3 py-2 text-left font-semibold">
+                    {children}
+                  </th>
+                ),
+                td: ({ children }) => (
+                  <td className="border border-dark-500 px-3 py-2">
+                    {children}
+                  </td>
+                ),
                 a: ({ children, href }) => (
                   <a href={href} className="text-accent-primary hover:underline" target="_blank" rel="noopener">
                     {children}
@@ -90,14 +109,30 @@ function Message({ message }: { message: ChatMessage }) {
           )}
 
           {/* Show data preview if available */}
-          {message.data && (
+          {message.data && !message.chart && (
             <div className="mt-3 p-3 bg-dark-800 rounded-lg border border-dark-500">
-              <div className="text-xs text-dark-200 mb-2 font-medium">Data Response</div>
+              <div className="text-xs text-dark-200 mb-2 font-medium flex items-center gap-1">
+                <Map className="w-3 h-3" /> Location Data
+              </div>
               <pre className="text-xs font-mono text-dark-100 overflow-x-auto">
                 {JSON.stringify(message.data, null, 2)}
               </pre>
             </div>
           )}
+
+          {/* Show indicators */}
+          <div className="flex items-center gap-2 mt-2">
+            {message.mapLayers && message.mapLayers.length > 0 && (
+              <span className="text-xs bg-accent-primary/20 text-accent-primary px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Map className="w-3 h-3" /> {message.mapLayers.length} layers added
+              </span>
+            )}
+            {message.chart && (
+              <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <BarChart3 className="w-3 h-3" /> Chart generated
+              </span>
+            )}
+          </div>
 
           <div className="text-xs text-dark-300 mt-2">
             {message.timestamp.toLocaleTimeString()}
@@ -122,6 +157,12 @@ export default function ChatPanel() {
     showCode,
     toggleCode,
     addLayer,
+    clearLayers,
+    setMapAction,
+    setChart,
+    currentChart,
+    showChart,
+    toggleChart,
     setViewState
   } = useAppStore()
 
@@ -158,10 +199,13 @@ export default function ChatPanel() {
         code: response.code,
         mapLayers: response.map_layers,
         data: response.data,
+        chart: response.chart as any,
+        mapAction: response.map_action,
       })
 
-      // Add any map layers from the response
+      // Clear existing layers and add new ones
       if (response.map_layers && response.map_layers.length > 0) {
+        clearLayers()
         response.map_layers.forEach((layer: any) => {
           addLayer({
             id: layer.id,
@@ -173,21 +217,32 @@ export default function ChatPanel() {
             paint: layer.paint,
           })
         })
+      }
 
-        // If Kazakhstan is mentioned, fly to it
-        if (userMessage.toLowerCase().includes('kazakhstan')) {
+      // Handle map action (flyTo, fitBounds, etc.)
+      if (response.map_action) {
+        if (response.map_action.type === 'flyTo' && response.map_action.center) {
           setViewState({
-            longitude: 67.0,
-            latitude: 48.0,
-            zoom: 4,
+            longitude: response.map_action.center[0],
+            latitude: response.map_action.center[1],
+            zoom: response.map_action.zoom || 12,
+            pitch: response.map_action.pitch || 0,
+            bearing: response.map_action.bearing || 0,
           })
         }
+        setMapAction(response.map_action)
       }
+
+      // Handle chart data
+      if (response.chart) {
+        setChart(response.chart as any)
+      }
+
     } catch (error) {
       console.error('Error sending message:', error)
       addMessage({
         role: 'assistant',
-        content: '❌ Sorry, there was an error processing your request. Please make sure the backend server is running.',
+        content: '❌ Sorry, there was an error processing your request. Please make sure the backend server is running at http://localhost:8000',
       })
     } finally {
       setLoading(false)
@@ -202,12 +257,14 @@ export default function ChatPanel() {
     }
   }
 
-  // Example queries
+  // Example queries - updated with new capabilities
   const exampleQueries = [
-    'Show Kazakhstan boundaries',
-    'Calculate NDVI for Almaty',
-    'Detect water bodies near Astana',
-    'Show land use classification',
+    'Show me Astana',
+    'Population of Almaty',
+    '3D buildings in Astana',
+    'Compare Astana vs Almaty',
+    'Temperature in Karaganda',
+    'Show all cities',
   ]
 
   return (
@@ -216,9 +273,18 @@ export default function ChatPanel() {
       <div className="flex items-center justify-between p-4 border-b border-dark-500">
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-accent-primary" />
-          <h2 className="font-semibold">GeoGPT Chat</h2>
+          <h2 className="font-semibold">ApexGIS Chat</h2>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={toggleChart}
+            className={`p-2 rounded-lg transition-colors ${
+              showChart ? 'bg-purple-500/20 text-purple-400' : 'hover:bg-dark-600'
+            }`}
+            title="Toggle chart display"
+          >
+            <BarChart3 className="w-4 h-4" />
+          </button>
           <button
             onClick={toggleCode}
             className={`p-2 rounded-lg transition-colors ${
@@ -229,7 +295,11 @@ export default function ChatPanel() {
             <Code className="w-4 h-4" />
           </button>
           <button
-            onClick={clearMessages}
+            onClick={() => {
+              clearMessages()
+              clearLayers()
+              setChart(null)
+            }}
             className="p-2 rounded-lg hover:bg-dark-600 transition-colors"
             title="Clear chat"
           >
@@ -239,7 +309,7 @@ export default function ChatPanel() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {messages.map((message) => (
           <Message key={message.id} message={message} />
         ))}
@@ -258,9 +328,16 @@ export default function ChatPanel() {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Chart Panel - show if we have chart data */}
+      {currentChart && showChart && (
+        <div className="px-6 pb-4">
+          <ChartPanel chart={currentChart} />
+        </div>
+      )}
+
       {/* Example queries (show when no user messages) */}
       {messages.length === 1 && (
-        <div className="px-4 pb-2">
+        <div className="px-6 pb-4">
           <div className="text-xs text-dark-300 mb-2">Try asking:</div>
           <div className="flex flex-wrap gap-2">
             {exampleQueries.map((query) => (
@@ -278,31 +355,31 @@ export default function ChatPanel() {
 
       {/* Input */}
       <div className="p-4 border-t border-dark-500">
-        <div className="relative">
+        <div className="flex gap-2 items-end">
           <textarea
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask about geospatial data, satellite imagery, or analysis..."
-            className="input-dark pr-12 resize-none"
+            placeholder="Ask about cities, population, 3D visualization, heatmaps..."
+            className="flex-1 input-dark resize-none"
             rows={2}
             disabled={isLoading}
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
-            className="absolute right-3 bottom-3 p-2 rounded-lg bg-accent-primary text-dark-900 hover:bg-accent-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="flex-shrink-0 p-3 rounded-lg bg-accent-primary text-dark-900 hover:bg-accent-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all h-[60px]"
           >
             {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              <Send className="w-4 h-4" />
+              <Send className="w-5 h-5" />
             )}
           </button>
         </div>
         <div className="text-xs text-dark-300 mt-2">
-          Press Enter to send, Shift+Enter for new line
+          Press Enter to send • Shift+Enter for new line
         </div>
       </div>
     </div>

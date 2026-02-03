@@ -26,7 +26,7 @@ export default function Sidebar() {
   const ActiveComponent = panels.find(p => p.id === activePanel)?.component || ChatPanel
 
   return (
-    <div className={`flex h-full transition-all duration-300 ${isSidebarOpen ? 'w-96' : 'w-14'}`}>
+    <div className={`flex h-full transition-all duration-300 ${isSidebarOpen ? 'w-[26rem]' : 'w-14'}`}>
       {/* Navigation rail */}
       <div className="w-14 flex-shrink-0 bg-dark-800 border-r border-dark-500 flex flex-col">
         {/* Logo */}
@@ -158,7 +158,7 @@ function DataPanel() {
           <ul className="space-y-1 text-sm text-dark-200">
             <li>• IBM-NASA Prithvi (EO)</li>
             <li>• Segment Anything (SAM)</li>
-            <li>• GeoGPT (Llama/Qwen)</li>
+            <li>• ApexGIS (Llama/Qwen)</li>
           </ul>
         </div>
       </div>
@@ -172,8 +172,8 @@ function CodePanel() {
   
   // Get all code from messages
   const codeSnippets = messages
-    .filter(m => m.code)
-    .map(m => ({ timestamp: m.timestamp, code: m.code }))
+    .filter((m: any) => m.code)
+    .map((m: any) => ({ timestamp: m.timestamp, code: m.code }))
 
   return (
     <div className="flex flex-col h-full">
@@ -187,12 +187,12 @@ function CodePanel() {
             <Code className="w-12 h-12 mx-auto mb-3 opacity-30" />
             <p className="text-sm">No code generated yet</p>
             <p className="text-xs mt-1">
-              Ask GeoGPT to analyze data to see the Python code
+              Ask ApexGIS AI to analyze data to see the Python code
             </p>
           </div>
         ) : (
           <div className="space-y-4">
-            {codeSnippets.map((snippet, idx) => (
+            {codeSnippets.map((snippet: any, idx: number) => (
               <div key={idx} className="bg-dark-900 rounded-lg border border-dark-500 overflow-hidden">
                 <div className="px-3 py-2 bg-dark-800 border-b border-dark-500 flex items-center justify-between">
                   <span className="text-xs text-dark-300">
