@@ -16,7 +16,20 @@ import {
 } from 'lucide-react'
 import { useAppStore } from '../store'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// Get API URL - production or local
+const getApiBase = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL
+  }
+  if (typeof window !== 'undefined' && 
+      (window.location.hostname.includes('vercel.app') || 
+       window.location.hostname.includes('apexgeo'))) {
+    return 'https://apexgeo-api-production.up.railway.app'
+  }
+  return 'http://localhost:8000'
+}
+
+const API_BASE = getApiBase()
 
 // Environmental layer types
 type EnvLayerType = 'air-quality' | 'methane' | 'co2' | 'temperature' | 'fire' | 'wind'

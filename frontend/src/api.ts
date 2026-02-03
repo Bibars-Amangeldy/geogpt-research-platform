@@ -8,11 +8,11 @@ const getApiBaseUrl = () => {
     return envUrl
   }
   
-  // Production: use Render backend
+  // Production: use Railway backend
   if (window.location.hostname.includes('vercel.app') || 
       window.location.hostname.includes('apexgeo') ||
       window.location.hostname.includes('netlify')) {
-    return 'https://apexgeo-api.onrender.com'
+    return 'https://apexgeo-api-production.up.railway.app'
   }
   
   // Auto-detect: use same hostname as frontend but with port 8000

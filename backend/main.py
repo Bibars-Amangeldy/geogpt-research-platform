@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
     debug: bool = True
-    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000,https://apexgeo.vercel.app,https://apexgeo-api.onrender.com"
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000,https://apexgeo.vercel.app,https://apexgeo-api-production.up.railway.app"
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 

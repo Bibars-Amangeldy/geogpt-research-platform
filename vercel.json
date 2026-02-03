@@ -5,7 +5,7 @@
   "framework": "vite",
   "installCommand": "cd frontend && npm install",
   "env": {
-    "VITE_API_URL": "https://apexgeo-api.onrender.com"
+    "VITE_API_URL": "https://apexgeo-api-production.up.railway.app"
   },
   "rewrites": [
     {
